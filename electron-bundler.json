@@ -1,0 +1,15 @@
+{
+  "appId": "com.codethat.atomic",
+  "files": ["dist-electron", "dist-react"],
+  "icon": "./usage-icon.png",
+  "mac": {
+    "target": "dmg"
+  },
+  "win": {
+    "target": ["portable", "msi"]
+  },
+  "linux": {
+    "target": "AppImage",
+    "category": "Utility"
+  }
+}
