@@ -13,7 +13,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <DashboardHeader collapsed={collapsed} setCollapsed={setCollapsed} />
 
         <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-[1800px] ">{children}</div>
+          <div className="mx-auto max-w-[1800px]">{children}</div>
         </main>
       </div>
     </div>

@@ -5,7 +5,7 @@ export interface FilterOption {
   columnId: string;
   label: string;
   type: "text" | "select";
-  choices?: { label: string; value: any }[];
+  choices?: { label: string; value: string | number }[];
   placeholder?: string;
 }
 
@@ -13,7 +13,7 @@ export interface FetchParams {
   pageIndex: number;
   pageSize: number;
   sorting: { id: string; desc: boolean }[];
-  filters: Record<string, any>;
+  filters: Record<string, unknown>;
 }
 
 export interface DynamicTableProps<TData> {

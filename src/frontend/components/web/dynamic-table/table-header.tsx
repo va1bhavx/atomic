@@ -1,16 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "../../ui/input";
-import type { FilterOption } from "../../../types/dynamicTableTypes";
-
-interface TableHeaderProps {
-  title?: string;
-  description?: string;
-  filters?: FilterOption[];
-  activeFilters: Record<string, any>;
-  onFilterChange: (columnId: string, value: any) => void;
-  headerActions?: React.ReactNode;
-}
+import type { TableHeaderProps } from "../../../types/tableHeaderTypes";
 
 // Debounced input search component to prevent API spamming
 function DebouncedInput({
@@ -23,11 +14,13 @@ function DebouncedInput({
   onChange: (value: string) => void;
   debounce?: number;
 } & Omit<React.ComponentProps<"input">, "onChange">) {
+  const [prevInitialValue, setPrevInitialValue] = useState(initialValue);
   const [value, setValue] = useState(initialValue);
 
-  useEffect(() => {
+  if (initialValue !== prevInitialValue) {
+    setPrevInitialValue(initialValue);
     setValue(initialValue);
-  }, [initialValue]);
+  }
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -35,7 +28,7 @@ function DebouncedInput({
     }, debounce);
 
     return () => clearTimeout(timeout);
-  }, [value]);
+  }, [value, onChange, debounce]);
 
   return (
     <div className="relative w-full max-w-[240px] flex items-center">
@@ -92,7 +85,7 @@ export function TableHeader({
                     placeholder={
                       filter.placeholder || `Search ${filter.label}...`
                     }
-                    value={activeFilters[filter.columnId] || ""}
+                    value={(activeFilters[filter.columnId] as string) || ""}
                     onChange={(val) => onFilterChange(filter.columnId, val)}
                   />
                 );
@@ -102,7 +95,7 @@ export function TableHeader({
                 return (
                   <div key={filter.columnId} className="flex items-center">
                     <select
-                      value={activeFilters[filter.columnId] || ""}
+                      value={(activeFilters[filter.columnId] as string | number) || ""}
                       onChange={(e) =>
                         onFilterChange(
                           filter.columnId,
@@ -112,11 +105,13 @@ export function TableHeader({
                       className="h-8 border border-input rounded-xl bg-background px-3 py-0 text-xs font-semibold text-foreground focus:ring-1 focus:ring-primary focus:outline-none cursor-pointer min-w-[140px]"
                     >
                       <option value="">All {filter.label}</option>
-                      {filter.choices?.map((choice: { label: string; value: any }) => (
-                        <option key={choice.value} value={choice.value}>
-                          {choice.label}
-                        </option>
-                      ))}
+                      {filter.choices?.map(
+                        (choice: { label: string; value: string | number }) => (
+                          <option key={choice.value} value={choice.value}>
+                            {choice.label}
+                          </option>
+                        ),
+                      )}
                     </select>
                   </div>
                 );

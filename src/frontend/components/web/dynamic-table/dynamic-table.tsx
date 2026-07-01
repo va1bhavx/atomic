@@ -156,21 +156,21 @@ export function DynamicTable<TData>({
           <TableFallback type="no-data" customConfig={fallback} />
         ) : (
           <table className="w-full text-left border-collapse select-text relative">
-            <thead className="sticky top-0">
+            <thead className={`sticky top-0 ${rowClassName}`}>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr
                   key={headerGroup.id}
-                  className={`border-b  border-border-primary  text-xs font-bold text-muted-foreground select-none ${rowClassName}`}
+                  className={`border-b  border-border-primary  text-xs font-bold text-muted-foreground select-none `}
                 >
                   {headerGroup.headers.map((header) => {
-                    const isSortable = header.column.getCanSort();
+                    const isSortable: boolean = header.column.getCanSort();
                     const sortDirection = header.column.getIsSorted();
 
                     return (
                       <th
                         key={header.id}
                         onClick={header.column.getToggleSortingHandler()}
-                        className={`py-3 px-4 select-none ${isSortable ? "cursor-pointer hover:bg-muted/20 hover:text-foreground" : ""}`}
+                        className={`py-3 px-4  select-none ${isSortable ? "cursor-pointer hover:bg-muted/20 hover:text-foreground" : ""}`}
                       >
                         <div className="flex items-center gap-1">
                           {header.isPlaceholder
@@ -202,11 +202,11 @@ export function DynamicTable<TData>({
                 </tr>
               ))}
             </thead>
-            <tbody className="divide-y divide-border-primary text-xs font-medium text-foreground">
+            <tbody className="divide-y divide-border-primary bg-background! text-xs font-medium text-foreground">
               {table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className={`hover:bg-muted/10 transition-colors select-text ${rowClassName || ""}`}
+                  className={`hover:bg-muted/10 transition-colors select-text `}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="py-3.5 px-4 select-text">

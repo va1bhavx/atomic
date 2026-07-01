@@ -1,6 +1,10 @@
 import { app, BrowserWindow, ipcMain, safeStorage } from "electron";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // A local config file path to save the encrypted token in the user's local app data directory
 const tokenPath = path.join(app.getPath("userData"), "token.bin");

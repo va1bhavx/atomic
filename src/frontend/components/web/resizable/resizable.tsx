@@ -41,7 +41,10 @@ export function Resizable({
     startHeight: number;
   } | null>(null);
 
-  const startResize = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>, direction: ResizeDirection) => {
+  const startResize = (
+    e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
+    direction: ResizeDirection,
+  ) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -76,16 +79,28 @@ export function Resizable({
 
       switch (dragInfo.current.direction) {
         case "bottom":
-          nextHeight = Math.max(minHeight, Math.min(maxHeight, dragInfo.current.startHeight + deltaY));
+          nextHeight = Math.max(
+            minHeight,
+            Math.min(maxHeight, dragInfo.current.startHeight + deltaY),
+          );
           break;
         case "top":
-          nextHeight = Math.max(minHeight, Math.min(maxHeight, dragInfo.current.startHeight - deltaY));
+          nextHeight = Math.max(
+            minHeight,
+            Math.min(maxHeight, dragInfo.current.startHeight - deltaY),
+          );
           break;
         case "right":
-          nextWidth = Math.max(minWidth, Math.min(maxWidth, dragInfo.current.startWidth + deltaX));
+          nextWidth = Math.max(
+            minWidth,
+            Math.min(maxWidth, dragInfo.current.startWidth + deltaX),
+          );
           break;
         case "left":
-          nextWidth = Math.max(minWidth, Math.min(maxWidth, dragInfo.current.startWidth - deltaX));
+          nextWidth = Math.max(
+            minWidth,
+            Math.min(maxWidth, dragInfo.current.startWidth - deltaX),
+          );
           break;
       }
 
@@ -114,18 +129,31 @@ export function Resizable({
       window.removeEventListener("touchmove", handlePointerMove);
       window.removeEventListener("touchend", stopResize);
     };
-  }, [isDragging, minHeight, maxHeight, minWidth, maxWidth, onResize, width, height]);
+  }, [
+    isDragging,
+    minHeight,
+    maxHeight,
+    minWidth,
+    maxWidth,
+    onResize,
+    width,
+    height,
+  ]);
 
   // Determine handles positioning CSS classes
   const handleStyles: Record<ResizeDirection, string> = {
-    bottom: "absolute bottom-0 left-0 right-0 h-2 cursor-grab active:cursor-grabbing hover:bg-primary/20 border-b z-20 flex items-center justify-center",
-    top: "absolute top-0 left-0 right-0 h-2 cursor-grab active:cursor-grabbing hover:bg-primary/20 border-t z-20 flex items-center justify-center",
-    right: "absolute right-0 top-0 bottom-0 w-2 cursor-grab active:cursor-grabbing hover:bg-primary/20 border-r z-20 flex items-center justify-center",
-    left: "absolute left-0 top-0 bottom-0 w-2 cursor-grab active:cursor-grabbing hover:bg-primary/20 border-l z-20 flex items-center justify-center",
+    bottom:
+      "absolute bottom-0 left-0 right-0 h-2 cursor-grab active:cursor-grabbing hover:bg-primary/20 border-b border-border-primary z-20 flex items-center justify-center",
+    top: "absolute top-0 left-0 right-0 h-2 cursor-grab active:cursor-grabbing hover:bg-primary/20 border-t border-border-primary z-20 flex items-center justify-center",
+    right:
+      "absolute right-0 top-0 bottom-0 w-2 cursor-grab active:cursor-grabbing hover:bg-primary/20 border-r border-border-primary z-20 flex items-center justify-center",
+    left: "absolute left-0 top-0 bottom-0 w-2 cursor-grab active:cursor-grabbing hover:bg-primary/20 border-l border-border-primary z-20 flex items-center justify-center",
   };
 
-  const hasWidthProp = directions.includes("left") || directions.includes("right");
-  const hasHeightProp = directions.includes("top") || directions.includes("bottom");
+  const hasWidthProp =
+    directions.includes("left") || directions.includes("right");
+  const hasHeightProp =
+    directions.includes("top") || directions.includes("bottom");
 
   return (
     <div

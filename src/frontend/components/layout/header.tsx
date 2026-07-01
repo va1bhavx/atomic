@@ -11,6 +11,7 @@ import {
   Sun,
   Moon,
   User2Icon,
+  FileBarChart,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
@@ -99,15 +100,22 @@ export function DashboardHeader({
           </span>
         </Badge>
 
-        <Badge variant="outline" className="rounded-[6px] px-4 py-3">
+        <Badge
+          variant="outline"
+          className="rounded-[6px] border-none ring ring-border-primary  px-4 py-3"
+        >
           <Lock size={10} className="text-muted-foreground/85" />
           Read-only
         </Badge>
 
         {/* Vertical divider */}
-        <div className="h-4 w-px bg-border border-border-primary" />
+        <div className="h-4 w-px bg-border border-r border-border-primary" />
 
         {/* Theme Toggle */}
+
+        <Button size="icon" variant="outline" className="rounded-[6px]">
+          <FileBarChart size={16} />
+        </Button>
         <Button
           variant="outline"
           size="icon"

@@ -6,15 +6,8 @@ import { Button } from "../../../components/ui/button";
 import { DynamicTable } from "../../../components/web/dynamic-table/dynamic-table";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Resizable } from "../../../components/web/resizable/resizable";
-
-interface QueryTab {
-  id: string;
-  name: string;
-  query: string;
-  columns: string[];
-  rows: Record<string, any>[];
-  limit: string;
-}
+import type { MonacoEditorInstance } from "../../../types/monacoEditorTypes";
+import type { QueryTab } from "../../../types/queryTabTypes";
 
 const DEFAULT_QUERY_1 = `-- newest signups with first order value
 SELECT u.username,
@@ -166,7 +159,7 @@ export default function RunQueryTab() {
   const [tempTabName, setTempTabName] = useState<string>("");
 
   const activeTab = tabs.find((t) => t.id === activeTabId) || tabs[0];
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<MonacoEditorInstance | null>(null);
 
   useEffect(() => {
     if (editorRef.current && activeTab) {
@@ -174,7 +167,7 @@ export default function RunQueryTab() {
     }
   }, [activeTabId, activeTab]);
 
-  const handleEditorDidMount = (editor: any) => {
+  const handleEditorDidMount = (editor: MonacoEditorInstance) => {
     editorRef.current = editor;
   };
 
@@ -201,7 +194,8 @@ export default function RunQueryTab() {
     if (editorRef.current) {
       const model = editorRef.current.getModel();
       const selection = editorRef.current.getSelection();
-      const selectedText = model.getValueInRange(selection);
+      const selectedText =
+        model && selection ? model.getValueInRange(selection) : "";
       if (selectedText) {
         console.log("Running selection:", selectedText);
         runQuery();
@@ -295,7 +289,7 @@ export default function RunQueryTab() {
     setShowLimitDropdown(false);
   };
 
-  const formatCurrency = (val: any) => {
+  const formatCurrency = (val: unknown) => {
     if (val === null || val === undefined)
       return (
         <span className="italic text-muted-foreground/60 select-none">
@@ -305,10 +299,10 @@ export default function RunQueryTab() {
     if (typeof val === "number" && val > 1000) {
       return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
     }
-    return val.toString();
+    return String(val);
   };
 
-  const columns = useMemo<ColumnDef<Record<string, any>>[]>(() => {
+  const columns = useMemo<ColumnDef<Record<string, unknown>>[]>(() => {
     return activeTab.columns.map((col) => ({
       accessorKey: col,
       header: col,
@@ -499,7 +493,7 @@ export default function RunQueryTab() {
                 endpoint={tableEndpoint}
                 queryKey={tableQueryKey}
                 enablePagination={false}
-                rowClassName="bg-background"
+                rowClassName="bg-card"
               />
             </div>
 

@@ -11,14 +11,9 @@ import PreviewDataTab from "./components/preview-data-tab";
 import RunQueryTab from "./components/run-query-tab";
 import SchemaTab from "./components/schema-tab";
 import StructureTab from "./components/structure-tab";
+import type { TabItem } from "../../types/generalTypes";
 
-interface TabItem {
-  value: string;
-  name: string;
-  content: React.ReactNode;
-}
-
-const TAB_LISTS: TabItem[] = [
+export const TAB_LISTS: TabItem[] = [
   { value: "structure", name: "Structure", content: <StructureTab /> },
   { value: "preview-data", name: "Preview Data", content: <PreviewDataTab /> },
   { value: "dependencies", name: "Dependencies", content: <DependenciesTab /> },
