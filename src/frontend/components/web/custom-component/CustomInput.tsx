@@ -4,7 +4,7 @@ import { cn } from "../../../lib/utils";
 
 const inputVariants = cva(
   [
-    "flex w-full min-w-0 rounded-sm border bg-white/[0.03] text-foreground ",
+    "flex w-full min-w-0  border bg-white/[0.03] text-foreground ",
     "border-white/10 shadow-[var(--shadow-sm)]",
     "outline-none transition-[color,box-shadow,border-color,background-color] duration-150",
     "placeholder:text-muted-foreground",
@@ -19,7 +19,7 @@ const inputVariants = cva(
   {
     variants: {
       inputSize: {
-        sm: "h-8 px-2.5 text-[13px] rounded-[calc(var(--radius-md)-2px)]",
+        sm: "h-8 px-2.5 text-[13px] ",
         default: "h-10 px-3.5 text-sm",
         lg: "h-11 px-4 text-[15px]",
       },
