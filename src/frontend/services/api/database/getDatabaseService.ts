@@ -8,7 +8,11 @@
 // 	});
 // };
 
-import type { SavedProfiles } from "../../../types/databaseTypes";
+import type {
+  DatabaseConnectionPayload,
+  SavedProfiles,
+  TestConnectionResponse,
+} from "../../../types/databaseTypes";
 import type { ApiResponse, ConnectResponse } from "../../../types/generalTypes";
 import { apiEndPoints } from "../../apiEndPoints";
 import { makeApiRequest } from "../../makeApiRequest";
@@ -28,5 +32,15 @@ export const connectProfile = async (
     url: apiEndPoints.CONNECT_PROFILE,
     method: "POST",
     data: { userId },
+  });
+};
+
+export const postTestConnection = async (
+  payload: DatabaseConnectionPayload,
+) => {
+  return makeApiRequest<ApiResponse<TestConnectionResponse>>({
+    url: apiEndPoints.TEST_CONNECTION,
+    method: "POST",
+    data: payload,
   });
 };

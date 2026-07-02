@@ -25,3 +25,7 @@ export interface SavedProfiles {
   lastConnectedTime: string;
   lastConnectionStatus: string;
 }
+
+export interface TestConnectionResponse {
+  isConnected: boolean;
+}

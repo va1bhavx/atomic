@@ -7,6 +7,8 @@ import { DATABASES, ENVIRONMENTS } from "../../../types/generalTypes";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTestConnection } from "../../../hooks/useDatabaseAPI";
+import { Badge } from "../../../components/ui/badge";
 
 const connectionSchema = z.object({
   host: z.string().min(1, "Host is required"),
@@ -14,11 +16,11 @@ const connectionSchema = z.object({
     .string()
     .min(1, "Port is required")
     .regex(/^\d+$/, "Port must be a number"),
-  database: z.string().min(1, "Database is required"),
+  dbName: z.string().min(1, "Database is required"),
   environment: z.string().min(1, "Environment is required"),
   username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
-  engine: z.string().min(1, "Engine is required"),
+  dbType: z.string().min(1, "Engine is required"),
   profileName: z.string().min(1, "Profile name is required"),
 });
 
@@ -31,20 +33,22 @@ export default function NewConnection() {
   const [selectedEnvironment, setSelectedEnvironment] = useState(
     Object.values(ENVIRONMENTS)[0].label,
   );
-
+  const [isTestConnected, setIsTestConnected] = useState<boolean>(false);
+  const { mutate: testConnection } = useTestConnection();
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<ConnectionFormValues>({
     resolver: zodResolver(connectionSchema),
     defaultValues: {
       host: "",
       port: "",
-      database: "",
-      environment: "",
+      dbName: "",
+      environment: "LOCAL",
       username: "",
-      engine: "",
+      dbType: "POSTGRES",
       profileName: "",
       password: "",
     },
@@ -52,25 +56,48 @@ export default function NewConnection() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(true);
 
-  const handleTestConnection = async () => {
+  const handleTestConnection = async (data: ConnectionFormValues) => {
     setIsTesting(true);
     // TODO: wire up to the real connection-test endpoint
-    await new Promise((resolve) => setTimeout(resolve, 900));
-    setIsTesting(false);
+    console.log("Valid form data:", data);
+    testConnection(
+      {
+        dbName: data.dbName,
+        dbType: data.dbType,
+        profileName: data.profileName,
+        username: data.username,
+        host: data.host,
+        port: parseInt(data.port),
+        password: data.password,
+        environment: data.environment,
+      },
+      {
+        onSuccess: (response) => {
+          setIsConnecting(false);
+          setIsTesting(false);
+          setIsTestConnected(response.results.isConnected);
+          console.log(response);
+        },
+        onError: (error) => {
+          setIsTesting(false);
+          setIsConnecting(false);
+          console.error(error);
+        },
+      },
+    );
   };
 
-  const handleOnSubmit = (data: ConnectionFormValues) => {
+  const handleOnConnect = (data: ConnectionFormValues) => {
     // e.preventDefault();
+    setIsConnecting(true);
     console.log("Valid form data:", data);
     // TODO: wire up to the real connect handler
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(handleOnSubmit)}
-      className="flex flex-col gap-7 relative"
-    >
+    <form className="flex flex-col gap-7 relative">
       <div className="max-w-md">
         <h1 className="text-xl">Connect to database</h1>
       </div>
@@ -90,8 +117,11 @@ export default function NewConnection() {
                   key={engine.label}
                   type="button"
                   aria-pressed={isSelected}
-                  {...register("engine")}
-                  onClick={() => setSelectedEngine(engine)}
+                  {...register("dbType")}
+                  onClick={() => {
+                    setSelectedEngine(engine);
+                    setValue("dbType", engine.label);
+                  }}
                   className={`relative flex flex-col items-center gap-2 rounded-md py-4 cursor-pointer transition-all outline-none
                   ${
                     isSelected
@@ -115,15 +145,13 @@ export default function NewConnection() {
 
                   <span className="text-xs font-medium">{engine.label}</span>
                 </button>
-                {errors.engine && (
-                  <span className="text-xs text-red-500">
-                    {errors.engine.message}
-                  </span>
-                )}
               </>
             );
           })}
         </div>
+        {errors.dbType && (
+          <span className="text-xs text-red-500">{errors.dbType.message}</span>
+        )}
       </div>
 
       {/* Profile name + environment */}
@@ -163,7 +191,10 @@ export default function NewConnection() {
                     role="radio"
                     {...register("environment")}
                     aria-checked={isSelected}
-                    onClick={() => setSelectedEnvironment(env.label)}
+                    onClick={() => {
+                      setSelectedEnvironment(env.label);
+                      setValue("environment", env.label);
+                    }}
                     className={`px-3 py-2 rounded-md text-xs font-medium cursor-pointer transition-all outline-none border
                     ${
                       isSelected
@@ -174,15 +205,15 @@ export default function NewConnection() {
                   >
                     {env.key}
                   </button>
-                  {errors.environment && (
-                    <span className="text-xs text-red-500">
-                      {errors.environment.message}
-                    </span>
-                  )}
                 </>
               );
             })}
           </div>
+          {errors.environment && (
+            <span className="text-xs text-red-500">
+              {errors.environment.message}
+            </span>
+          )}
         </div>
       </div>
 
@@ -236,13 +267,13 @@ export default function NewConnection() {
           <Input
             id="database"
             placeholder="e.g. inventory_db"
-            {...register("database")}
+            {...register("dbName")}
             inputSize={"sm"}
             className="rounded-xs"
           />
-          {errors.database && (
+          {errors.dbName && (
             <span className="text-xs text-red-500">
-              {errors.database.message}
+              {errors.dbName.message}
             </span>
           )}
         </div>
@@ -301,24 +332,35 @@ export default function NewConnection() {
         )}
       </div>
 
-      <div className="flex items-center justify-end gap-3">
-        <Button
-          type="submit"
-          variant="outline"
-          disabled={isTesting}
-          onClick={handleTestConnection}
-          className="rounded-md px-5 py-2.5 text-xs font-bold transition-all active:scale-95 hover:bg-muted cursor-pointer gap-1.5"
-        >
-          {isTesting && <Loader2 size={14} className="animate-spin" />}
-          {isTesting ? "Testing..." : "Test Connection"}
-        </Button>
-        <Button
-          type="submit"
-          className="rounded-md px-6 py-2.5 text-xs font-bold bg-foreground text-background hover:bg-foreground/90 transition-all active:scale-95 gap-1.5 shadow-sm cursor-pointer"
-        >
-          Connect
-          <ChevronRight size={14} />
-        </Button>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Button
+            type="submit"
+            variant="outline"
+            onClick={handleSubmit(handleTestConnection)}
+            disabled={isTesting}
+            className="rounded-md px-5 py-2.5 text-xs font-bold transition-all active:scale-95 hover:bg-muted cursor-pointer gap-1.5"
+          >
+            {isTesting && <Loader2 size={14} className="animate-spin" />}
+            {isTesting ? "Testing..." : "Test Connection"}
+          </Button>
+          {isTestConnected && (
+            <span className="px-2 py-1 rounded-sm  bg-green-500/20 text-xs text-green-500/80">
+              Connected
+            </span>
+          )}
+        </div>
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            type="submit"
+            className="rounded-md px-6 py-2.5 text-xs font-bold bg-foreground text-background hover:bg-foreground/90 transition-all active:scale-95 gap-1.5 shadow-sm cursor-pointer"
+            onClick={handleSubmit(handleOnConnect)}
+            disabled={isConnecting}
+          >
+            Connect
+            <ChevronRight size={14} />
+          </Button>
+        </div>
       </div>
     </form>
   );
