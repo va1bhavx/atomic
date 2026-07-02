@@ -24,7 +24,7 @@ export const TAB_LISTS: TabItem[] = [
 
 export default function DatabaseStructurePage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get("tab") || "run-query";
+  const activeTab = searchParams.get("tab") || "structure";
 
   return (
     <div className="space-y-8 animate-fade-in w-full ">

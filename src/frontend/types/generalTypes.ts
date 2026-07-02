@@ -9,6 +9,11 @@ export interface ApiResponse<T> {
   results: T;
 }
 
+export interface ConnectResponse {
+  jwtToken: string;
+  isConnected: boolean;
+}
+
 export const ENVIRONMENTS = {
   LOCAL: {
     key: "local",

@@ -1,19 +1,27 @@
 import { useMemo, useState } from "react";
 import { MoreVertical, Search, X } from "lucide-react";
 import { Input } from "../../../components/web/custom-component/CustomInput";
-import { useSavedProfiles } from "../../../hooks/useDatabaseAPI";
+import {
+  useConnectProfile,
+  useSavedProfiles,
+} from "../../../hooks/useDatabaseAPI";
 import { ErrorPage } from "../../../components/web/error-page";
 import { Button } from "../../../components/ui/button";
 import type { SavedProfiles as SavedProfilesType } from "../../../types/databaseTypes";
 import { Badge } from "../../../components/ui/badge";
 import { DATABASES, ENVIRONMENTS } from "../../../types/generalTypes";
 import { timeAgo } from "../../../utils/timeAgo";
+import { useNavigate } from "react-router-dom";
+import { authStorage } from "../../../services/auth-storage";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const SavedProfiles = () => {
   const [query, setQuery] = useState("");
 
   const { data: profiles, isLoading, isError, refetch } = useSavedProfiles();
-
+  const { mutate: connectProfile, isPending, variables } = useConnectProfile();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const filteredProfiles: SavedProfilesType[] = useMemo(() => {
     const q = query.trim().toLowerCase();
 
@@ -37,7 +45,7 @@ export const SavedProfiles = () => {
           <Button
             onClick={() => refetch()}
             variant={"default"}
-            className="text-white"
+            className="text-white rounded-md"
           >
             Retry
           </Button>
@@ -46,6 +54,19 @@ export const SavedProfiles = () => {
     );
 
   console.log(filteredProfiles, "filteredProfiles");
+
+  const handleConnect = async (userId: string) => {
+    if (!userId) {
+      return;
+    }
+    connectProfile(userId, {
+      onSuccess: async (response) => {
+        await authStorage.saveToken(response.results.jwtToken);
+        await queryClient.invalidateQueries({ queryKey: ["authToken"] });
+        navigate(`/database/structure`);
+      },
+    });
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -108,13 +129,21 @@ export const SavedProfiles = () => {
           {filteredProfiles?.map((profile: SavedProfilesType) => {
             const env = ENVIRONMENTS[profile.environment];
             const database = DATABASES[profile.dbType];
+
+            console.log("Comparing:", {
+              variables: variables,
+              profileId: profile.dbId,
+              isPending: isPending,
+              matches: variables === profile.dbId,
+            });
+
             return (
               <li
                 key={profile.dbId}
                 className="group bg-small-card ring ring-border-primary rounded-md px-4 py-5 flex items-center justify-between gap-4 transition-colors hover:bg-white/[0.02]"
               >
                 <div className="flex items-center gap-6 min-w-0">
-                  <div className="shrink-0 bg-card-header w-10 h-10 flex items-center justify-center rounded-md shadow-md">
+                  <div className="shrink-0 bg-card-header w-10 h-10 flex items-center justify-center rounded-md shadow-md border border-border-primary">
                     <img
                       src={database.icon}
                       alt={database.label}
@@ -150,8 +179,11 @@ export const SavedProfiles = () => {
                     <Button
                       variant="ghost"
                       className="text-xs p-0 h-auto cursor-pointer hover:bg-transparent! hover:text-foreground hover:underline underline-offset-2"
+                      onClick={() => handleConnect(profile.userId)}
                     >
-                      Connect
+                      {isPending && variables === profile.userId
+                        ? "Connecting..."
+                        : "Connect"}
                     </Button>
                   </div>
                   <Button

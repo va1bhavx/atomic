@@ -9,7 +9,7 @@
 // };
 
 import type { SavedProfiles } from "../../../types/databaseTypes";
-import type { ApiResponse } from "../../../types/generalTypes";
+import type { ApiResponse, ConnectResponse } from "../../../types/generalTypes";
 import { apiEndPoints } from "../../apiEndPoints";
 import { makeApiRequest } from "../../makeApiRequest";
 
@@ -18,5 +18,15 @@ export const getSavedProfiles = async (): Promise<
 > => {
   return makeApiRequest<ApiResponse<SavedProfiles[]>>({
     url: apiEndPoints.SAVED_PROFILES,
+  });
+};
+
+export const connectProfile = async (
+  userId: string,
+): Promise<ApiResponse<ConnectResponse>> => {
+  return makeApiRequest<ApiResponse<ConnectResponse>>({
+    url: apiEndPoints.CONNECT_PROFILE,
+    method: "POST",
+    data: { userId },
   });
 };

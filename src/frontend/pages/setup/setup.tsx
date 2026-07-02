@@ -1,9 +1,10 @@
-import { useSearchParams } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "../../components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import type { TabItem } from "../../types/generalTypes";
 import NewConnection from "./components/NewConnection";
 import { SavedProfiles } from "./components/SavedProfiles";
+import { useAuthToken } from "../../hooks/useAuthToken";
 
 const SETUP_TABS: TabItem[] = [
   {
@@ -31,6 +32,16 @@ const SETUP_TABS: TabItem[] = [
 export default function SetupPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "new-connection";
+
+  const { data: token, isLoading } = useAuthToken();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (token) {
+    return <Navigate to="/database/structure" replace />;
+  }
 
   return (
     <div className="flex items-center justify-center max-w-3xl mx-auto">
